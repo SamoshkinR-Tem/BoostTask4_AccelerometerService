@@ -7,23 +7,35 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.webkit.WebView;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import com.artsam.aos.entity.Sample;
 import com.artsam.aos.service.AccelerometerService;
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements CompoundButton.OnCheckedChangeListener {
 
     public static final String MAIN_TAG = "my_app";
+    public static final int FIRST_SAMPLE_POS = 0;
+
+    public static Firebase mFireBaseRef;
 
     private Context mContext = this;
     private boolean mIsBound;
+    private List<Sample> mSamples = new ArrayList<>();
     private ServiceConnection mConnection = new ServiceConnection() {
         private AccelerometerService mAccBoundService;
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -63,10 +75,14 @@ public class MainActivity extends AppCompatActivity
         SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.switch_control);
         switchCompat.setOnCheckedChangeListener(this);
 
-//        WebView myWebView = (WebView) findViewById(R.id.webview);
-//        myWebView.loadUrl("https://accobserverservice.firebaseio.com");
+
+        final RecyclerView recView = (RecyclerView) findViewById(R.id.rv_samples);
+        recView.setLayoutManager(new LinearLayoutManager(this));
+        recView.setAdapter(new MyRecAdapter(mSamples));
 
         Firebase.setAndroidContext(this);
+        mFireBaseRef = new Firebase("https://accobserverservice.firebaseio.com/measurements");
+        mFireBaseRef.addChildEventListener(new MyChildEventListener(recView));
     }
 
     @Override
@@ -85,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         // class name because we want a specific service implementation that
         // we know will be running in our own process (and thus won't be
         // supporting component replacement by other applications).
-        bindService(new Intent(mContext, AccelerometerService.class),
+        bindService(new Intent(this, AccelerometerService.class),
                 mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
