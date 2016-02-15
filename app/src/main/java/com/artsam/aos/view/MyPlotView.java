@@ -9,6 +9,7 @@ import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.artsam.aos.MainActivity;
@@ -79,7 +80,7 @@ public class MyPlotView extends View {
 
         final float midHeight = getHeight() / 2.0f;
         final float unitHeight = getHeight() / 20.0f;
-        final float unitWidth = (float) getWidth() / 21.0f;
+        float unitWidth = (float) getWidth() / mSamples.size();
 
         canvas.drawLine(0, midHeight, getWidth(), midHeight, mAxisX);
         canvas.drawLine(unitWidth, 0, unitWidth, getHeight(), mAxisY);
@@ -87,7 +88,7 @@ public class MyPlotView extends View {
         float startX = unitWidth, startY1 = midHeight, startY2 = midHeight, startY3 = midHeight,
                 stopX, stopY1, stopY2, stopY3;
 
-        for (int i = 0; i < mSamples.size(); i++) {
+        for (int i = mSamples.size() - 1; i >= 0; i--) {
             stopX = startX + unitWidth;
 
             stopY1 = unitHeight * mSamples.get(i).getX() + midHeight;
@@ -103,6 +104,15 @@ public class MyPlotView extends View {
             startY1 = stopY1;
             startY2 = stopY2;
             startY3 = stopY3;
+
+//            if (startX >= getWidth()/2) {
+//                unitWidth = (float) getWidth() / mSamples.size();
+//            }
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return super.onTouchEvent(ev);
     }
 }

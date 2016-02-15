@@ -1,5 +1,9 @@
 package com.artsam.aos.adapter;
 
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.graphics.Color;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,8 +61,11 @@ public class MyRecAdapter extends RecyclerView.Adapter<MyRecAdapter.ViewHolder> 
             super(itemView);
             mSampleName = (TextView) itemView.findViewById(R.id.tv_sample_name);
             mSampleX = (TextView) itemView.findViewById(R.id.tv_sample_x);
+            mSampleX.setTextColor(Color.rgb(1, 168, 33));
             mSampleY = (TextView) itemView.findViewById(R.id.tv_sample_y);
+            mSampleY.setTextColor(Color.rgb(220, 56, 71));
             mSampleZ = (TextView) itemView.findViewById(R.id.tv_sample_z);
+            mSampleZ.setTextColor(Color.rgb(88, 144, 255));
         }
     }
 }

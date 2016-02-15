@@ -31,9 +31,8 @@ public class MainActivity extends AppCompatActivity
         implements CompoundButton.OnCheckedChangeListener {
 
     public static final String MAIN_TAG = "my_app";
-    private static final String STATE_PLOT = "statePlot";
     public static final int FIRST_SAMPLE_POS = 0;
-    public static final int TIME_INTERVAL = 3000;
+    public static final int TIME_INTERVAL = 500;
 
     public static Firebase mFireBaseRef;
 
@@ -93,10 +92,18 @@ public class MainActivity extends AppCompatActivity
         mLayoutMain.addView(recView);
 
 
+//        HorizontalScrollView hScrollView = new HorizontalScrollView(this);
+//        hScrollView.setLayoutParams(new LinearLayout.LayoutParams(
+//                LayoutParams.MATCH_PARENT, 0, 2));
+//        hScrollView.setFillViewport(true);
+//        hScrollView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+
         MyPlotView plotView = new MyPlotView(this);
         plotView.setSamples(mSamples);
         plotView.setLayoutParams(new LinearLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, 0, 2));
+
+//        hScrollView.addView(plotView);
         mLayoutMain.addView(plotView);
 
         mFireBaseRef.addChildEventListener(new MyChildEventListener(recView, plotView));
