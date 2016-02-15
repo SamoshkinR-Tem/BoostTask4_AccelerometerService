@@ -78,36 +78,40 @@ public class MyPlotView extends View {
 
         Log.d(MainActivity.MAIN_TAG, "MyPlotView: onDraw");
 
-        final float midHeight = getHeight() / 2.0f;
-        final float unitHeight = getHeight() / 20.0f;
-        float unitWidth = (float) getWidth() / mSamples.size();
+        float elementsOnScreen = 25;
+        if (mSamples.size() > elementsOnScreen) {
+            elementsOnScreen = mSamples.size() + 3;
+        }
+
+        float midHeight = getHeight() / 2.0f;
+        float unitHeight = getHeight() / 22.0f;
+        float unitWidth = (float) getWidth() / elementsOnScreen;
 
         canvas.drawLine(0, midHeight, getWidth(), midHeight, mAxisX);
-        canvas.drawLine(unitWidth, 0, unitWidth, getHeight(), mAxisY);
+        canvas.drawLine(2 * unitWidth, 0, 2 * unitWidth, getHeight(), mAxisY);
+        canvas.drawText("+10", unitWidth, -unitHeight * 10 + midHeight, new Paint(Paint.ANTI_ALIAS_FLAG));
+        canvas.drawText("  0", unitWidth, midHeight, new Paint(Paint.ANTI_ALIAS_FLAG));
+        canvas.drawText("-10", unitWidth, -unitHeight * -10 + midHeight , new Paint(Paint.ANTI_ALIAS_FLAG));
 
-        float startX = unitWidth, startY1 = midHeight, startY2 = midHeight, startY3 = midHeight,
+        float startX = 2 * unitWidth, startY1 = midHeight, startY2 = midHeight, startY3 = midHeight,
                 stopX, stopY1, stopY2, stopY3;
 
         for (int i = mSamples.size() - 1; i >= 0; i--) {
             stopX = startX + unitWidth;
 
-            stopY1 = unitHeight * mSamples.get(i).getX() + midHeight;
+            stopY1 = -unitHeight * mSamples.get(i).getX() + midHeight;
             canvas.drawLine(startX, startY1, stopX, stopY1, mLineX);
 
-            stopY2 = unitHeight * mSamples.get(i).getY() + midHeight;
+            stopY2 = -unitHeight * mSamples.get(i).getY() + midHeight;
             canvas.drawLine(startX, startY2, stopX, stopY2, mLineY);
 
-            stopY3 = unitHeight * mSamples.get(i).getZ() + midHeight;
+            stopY3 = -unitHeight * mSamples.get(i).getZ() + midHeight;
             canvas.drawLine(startX, startY3, stopX, stopY3, mLineZ);
 
             startX = stopX;
             startY1 = stopY1;
             startY2 = stopY2;
             startY3 = stopY3;
-
-//            if (startX >= getWidth()/2) {
-//                unitWidth = (float) getWidth() / mSamples.size();
-//            }
         }
     }
 
