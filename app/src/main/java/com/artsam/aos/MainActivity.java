@@ -13,14 +13,16 @@ import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.Toast;
 
+import com.artsam.aos.adapter.MyRecAdapter;
 import com.artsam.aos.entity.Sample;
+import com.artsam.aos.listener.MyChildEventListener;
 import com.artsam.aos.service.AccelerometerService;
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
+import com.artsam.aos.view.MyPlotView;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +31,13 @@ public class MainActivity extends AppCompatActivity
         implements CompoundButton.OnCheckedChangeListener {
 
     public static final String MAIN_TAG = "my_app";
+    private static final String STATE_PLOT = "statePlot";
     public static final int FIRST_SAMPLE_POS = 0;
+    public static final int TIME_INTERVAL = 3000;
 
     public static Firebase mFireBaseRef;
 
+    private LinearLayout mLayoutMain;
     private Context mContext = this;
     private boolean mIsBound;
     private List<Sample> mSamples = new ArrayList<>();
@@ -69,20 +74,33 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mLayoutMain = (LinearLayout) findViewById(R.id.layout_main);
+
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
         SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.switch_control);
         switchCompat.setOnCheckedChangeListener(this);
 
-
-        final RecyclerView recView = (RecyclerView) findViewById(R.id.rv_samples);
-        recView.setLayoutManager(new LinearLayoutManager(this));
-        recView.setAdapter(new MyRecAdapter(mSamples));
-
         Firebase.setAndroidContext(this);
         mFireBaseRef = new Firebase("https://accobserverservice.firebaseio.com/measurements");
-        mFireBaseRef.addChildEventListener(new MyChildEventListener(recView));
+
+        RecyclerView recView = new RecyclerView(this);
+        recView.setLayoutManager(new LinearLayoutManager(this));
+        recView.setAdapter(new MyRecAdapter(mSamples));
+        recView.setLayoutParams(new LinearLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT, 0, 3));
+        mLayoutMain.addView(recView);
+
+
+        MyPlotView plotView = new MyPlotView(this);
+        plotView.setSamples(mSamples);
+        plotView.setLayoutParams(new LinearLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT, 0, 2));
+        mLayoutMain.addView(plotView);
+
+        mFireBaseRef.addChildEventListener(new MyChildEventListener(recView, plotView));
+
     }
 
     @Override

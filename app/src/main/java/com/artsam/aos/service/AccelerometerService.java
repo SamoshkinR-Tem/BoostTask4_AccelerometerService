@@ -86,12 +86,12 @@ public class AccelerometerService extends Service
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             long curTime = System.currentTimeMillis();
-            if ((curTime - lastUpdate) > 3000) {
+            if ((curTime - lastUpdate) > MainActivity.TIME_INTERVAL) {
                 Log.d(MainActivity.MAIN_TAG, "AccelerometerService: onSensorChanged " +
                         String.valueOf(event.values[0]));
 
                 mSamplesRef = MainActivity.mFireBaseRef.child("sample" + mCounter);
-                Sample s = new Sample(event.values[0], event.values[1], event.values[2]);
+                Sample s = new Sample("sample" + mCounter, event.values[0], event.values[1], event.values[2]);
                 mSamplesRef.setValue(s);
 
                 mCounter++;

@@ -2,6 +2,7 @@ package com.artsam.aos.entity;
 
 public class Sample {
 
+    private String name;
     private float x;
     private float y;
     private float z;
@@ -9,10 +10,15 @@ public class Sample {
     public Sample() {
     }
 
-    public Sample(float x, float y, float z) {
+    public Sample(String name, float x, float y, float z) {
+        this.name = name;
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public float getX() {

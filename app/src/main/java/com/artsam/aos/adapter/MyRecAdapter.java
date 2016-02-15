@@ -1,4 +1,4 @@
-package com.artsam.aos;
+package com.artsam.aos.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.artsam.aos.MainActivity;
+import com.artsam.aos.R;
 import com.artsam.aos.entity.Sample;
 
 import java.util.List;
@@ -29,10 +31,10 @@ public class MyRecAdapter extends RecyclerView.Adapter<MyRecAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(MyRecAdapter.ViewHolder holder, int position) {
-        holder.mSampleName.setText("Sample " + (mSamples.size() - 1));
-        holder.mSampleX.setText(String.valueOf(mSamples.get(position).getX()));
-        holder.mSampleY.setText(String.valueOf(mSamples.get(position).getY()));
-        holder.mSampleZ.setText(String.valueOf(mSamples.get(position).getZ()));
+        holder.mSampleName.setText(mSamples.get(position).getName());
+        holder.mSampleX.setText("Axis X: " + String.valueOf(mSamples.get(position).getX()));
+        holder.mSampleY.setText("Axis Y: " + String.valueOf(mSamples.get(position).getY()));
+        holder.mSampleZ.setText("Axis Z: " + String.valueOf(mSamples.get(position).getZ()));
     }
 
     public void add(Sample sample){
