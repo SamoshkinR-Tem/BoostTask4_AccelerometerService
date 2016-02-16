@@ -72,7 +72,7 @@ public class MyPlotView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mSamples.isEmpty()) {
+        if (mSamples == null || mSamples.isEmpty()) {
             return;
         }
 

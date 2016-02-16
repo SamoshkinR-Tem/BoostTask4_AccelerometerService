@@ -6,49 +6,41 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.Toast;
 
-import com.artsam.aos.adapter.MyRecAdapter;
-import com.artsam.aos.entity.Sample;
-import com.artsam.aos.listener.MyChildEventListener;
+import com.artsam.aos.adapter.TabPagerAdapter;
 import com.artsam.aos.service.AccelerometerService;
-import com.artsam.aos.view.MyPlotView;
 import com.firebase.client.Firebase;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements CompoundButton.OnCheckedChangeListener {
 
     public static final String MAIN_TAG = "my_app";
     public static final int FIRST_SAMPLE_POS = 0;
-    public static final int TIME_INTERVAL = 500;
+    public static final int TIME_INTERVAL = 1000;
 
     public static Firebase mFireBaseRef;
 
-    private LinearLayout mLayoutMain;
     private Context mContext = this;
     private boolean mIsBound;
-    private List<Sample> mSamples = new ArrayList<>();
     private ServiceConnection mConnection = new ServiceConnection() {
         private AccelerometerService mAccBoundService;
+
         public void onServiceConnected(ComponentName className, IBinder service) {
             // This is called when the connection with the service has been
             // established, giving us the service object we can use to
             // interact with the service.  Because we have bound to a explicit
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
-            mAccBoundService = ((AccelerometerService.AccelerometerBinder)service).getService();
+            mAccBoundService = ((AccelerometerService.AccelerometerBinder) service).getService();
 
             // Tell the user about this.
             Toast.makeText(mContext, R.string.local_service_connected,
@@ -73,47 +65,57 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLayoutMain = (LinearLayout) findViewById(R.id.layout_main);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.data)));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.users)));
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.switch_control);
-        switchCompat.setOnCheckedChangeListener(this);
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.vp_my_tabs);
+        final TabPagerAdapter tabAdapter = new TabPagerAdapter
+                (getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(tabAdapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         Firebase.setAndroidContext(this);
         mFireBaseRef = new Firebase("https://accobserverservice.firebaseio.com/measurements");
 
-        RecyclerView recView = new RecyclerView(this);
-        recView.setLayoutManager(new LinearLayoutManager(this));
-        recView.setAdapter(new MyRecAdapter(mSamples));
-        recView.setLayoutParams(new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, 0, 3));
-        mLayoutMain.addView(recView);
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
 
-//        HorizontalScrollView hScrollView = new HorizontalScrollView(this);
-//        hScrollView.setLayoutParams(new LinearLayout.LayoutParams(
-//                LayoutParams.MATCH_PARENT, 0, 2));
-//        hScrollView.setFillViewport(true);
-//        hScrollView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        SwitchCompat switchCompat = (SwitchCompat) menu.getItem(0)
+                .getActionView().findViewById(R.id.switch_control);
+        switchCompat.setOnCheckedChangeListener(this);
 
-        MyPlotView plotView = new MyPlotView(this);
-        plotView.setSamples(mSamples);
-        plotView.setLayoutParams(new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, 0, 2));
-
-//        hScrollView.addView(plotView);
-        mLayoutMain.addView(plotView);
-
-        mFireBaseRef.addChildEventListener(new MyChildEventListener(recView, plotView));
-
+        return true;
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         Log.d(MAIN_TAG, "MainActivity: onCheckedChanged " + isChecked);
-        if (isChecked){
+        if (isChecked) {
             doBindService();
         } else {
             doUnbindService();
