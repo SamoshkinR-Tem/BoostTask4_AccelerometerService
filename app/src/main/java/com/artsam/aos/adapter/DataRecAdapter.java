@@ -1,9 +1,6 @@
 package com.artsam.aos.adapter;
 
-import android.annotation.TargetApi;
-import android.content.Context;
 import android.graphics.Color;
-import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,16 +13,16 @@ import com.artsam.aos.entity.Sample;
 
 import java.util.List;
 
-public class MyRecAdapter extends RecyclerView.Adapter<MyRecAdapter.ViewHolder> {
+public class DataRecAdapter extends RecyclerView.Adapter<DataRecAdapter.ViewHolder> {
 
     private List<Sample> mSamples;
 
-    public MyRecAdapter(List<Sample> samples) {
+    public DataRecAdapter(List<Sample> samples) {
         this.mSamples = samples;
     }
 
     @Override
-    public MyRecAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public DataRecAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.card_sample, parent, false);
@@ -34,7 +31,7 @@ public class MyRecAdapter extends RecyclerView.Adapter<MyRecAdapter.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(MyRecAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(DataRecAdapter.ViewHolder holder, int position) {
         holder.mSampleName.setText(mSamples.get(position).getName());
         holder.mSampleX.setText("Axis X: " + String.valueOf(mSamples.get(position).getX()));
         holder.mSampleY.setText("Axis Y: " + String.valueOf(mSamples.get(position).getY()));

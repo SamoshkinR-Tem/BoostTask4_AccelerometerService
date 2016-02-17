@@ -95,9 +95,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        Firebase.setAndroidContext(this);
-        mFireBaseRef = new Firebase("https://accobserverservice.firebaseio.com/measurements");
-
+        initFireBase();
     }
 
     @Override
@@ -110,6 +108,11 @@ public class MainActivity extends AppCompatActivity
         switchCompat.setOnCheckedChangeListener(this);
 
         return true;
+    }
+
+    private void initFireBase(){
+        Firebase.setAndroidContext(this);
+        mFireBaseRef = new Firebase("https://accobserverservice.firebaseio.com/measurements");
     }
 
     @Override
