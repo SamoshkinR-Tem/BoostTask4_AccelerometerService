@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_id": "accelerometer-service",
+    "project_number": "979729169760",
+    "name": "Accelerometer Service"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:979729169760:android:5cfccfcf7fd2510f",
+        "client_id": "android:com.artsam.aos",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.artsam.aos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "979729169760-ii37p5af96rffvqrevrnd10ufgkvi82g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.artsam.aos",
+            "certificate_hash": "BCA173BD1B911056732312BA9A36E6696FFF4147"
+          }
+        },
+        {
+          "client_id": "979729169760-7ha9pf5u5c9e5vkheq7ilqsctb3ecldt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}

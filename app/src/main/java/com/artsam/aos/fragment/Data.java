@@ -35,7 +35,7 @@ public class Data extends Fragment {
         MyPlotView plotView = (MyPlotView) data.findViewById(R.id.my_plot_View);
         plotView.setSamples(mSamples);
 
-        MainActivity.mFireBaseRef.addChildEventListener(new MyChildEventListener(recView, plotView));
+        MainActivity.sFireBaseRef.addChildEventListener(new MyChildEventListener(recView, plotView));
 
         return data;
     }

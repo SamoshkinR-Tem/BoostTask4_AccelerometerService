@@ -63,7 +63,7 @@ public class AccelerometerService extends Service
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
 
-        MainActivity.mFireBaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        MainActivity.sFireBaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mCounter = (int) dataSnapshot.getChildrenCount();
@@ -90,9 +90,9 @@ public class AccelerometerService extends Service
                 Log.d(MainActivity.MAIN_TAG, "AccelerometerService: onSensorChanged " +
                         String.valueOf(event.values[0]));
 
-                mSamplesRef = MainActivity.mFireBaseRef.child("sample" + mCounter);
+//                mSamplesRef = MainActivity.sFireBaseRef.child("sample" + mCounter);
                 Sample s = new Sample("sample" + mCounter, event.values[0], event.values[1], event.values[2]);
-                mSamplesRef.setValue(s);
+                MainActivity.sFireBaseRef.push().setValue(s);
 
                 mCounter++;
                 lastUpdate = curTime;
