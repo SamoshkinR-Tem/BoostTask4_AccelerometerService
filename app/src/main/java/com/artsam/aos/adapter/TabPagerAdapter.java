@@ -3,7 +3,9 @@ package com.artsam.aos.adapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
 
+import com.artsam.aos.MainActivity;
 import com.artsam.aos.fragment.Data;
 import com.artsam.aos.fragment.Users;
 
@@ -27,6 +29,12 @@ public class TabPagerAdapter extends FragmentStatePagerAdapter {
                 return new Users();
         }
         return null;
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        // POSITION_NONE makes it possible to reload the PagerAdapter
+        return POSITION_NONE;
     }
 
     @Override

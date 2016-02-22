@@ -1,6 +1,5 @@
 package com.artsam.aos;
 
-import android.accounts.Account;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,6 +24,7 @@ import android.widget.Toast;
 import com.artsam.aos.adapter.TabPagerAdapter;
 import com.artsam.aos.service.AccelerometerService;
 import com.firebase.client.AuthData;
+import com.firebase.client.ChildEventListener;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.google.android.gms.auth.GoogleAuthException;
@@ -51,17 +51,22 @@ public class MainActivity extends AppCompatActivity
     public static final String MAIN_TAG = "my_app";
     public static final int FIRST_SAMPLE_POS = 0;
     public static final int TIME_INTERVAL = 1000;
-    public static final int RC_SIGN_IN = 9001;
+
+    private static final int RC_SIGN_IN = 9001;
     private static final int REQ_SIGN_IN_REQUIRED = 55664;
+    private static final String FIREBASE_URL = "https://accobserverservice.firebaseio.com/";
 
-    public static Firebase sFireBaseRef;
+    public static Firebase sUsersRef;
+    public static Firebase sSamplesRef;
+    public static ChildEventListener sChildEventListener;
 
-    private Context mContext = this;
     private boolean mIsBound;
+    private Context mContext = this;
     private GoogleApiClient mGoogleApiClient;
     private String mAccountName;
     private ProgressDialog mProgressDialog;
     private TextView mStatusTextView;
+    private TabPagerAdapter mTabAdapter;
     private ServiceConnection mConnection = new ServiceConnection() {
         private AccelerometerService mAccBoundService;
 
@@ -113,9 +118,8 @@ public class MainActivity extends AppCompatActivity
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = (ViewPager) findViewById(R.id.vp_my_tabs);
-        final TabPagerAdapter tabAdapter = new TabPagerAdapter
-                (getSupportFragmentManager(), tabLayout.getTabCount());
-        viewPager.setAdapter(tabAdapter);
+        mTabAdapter = new TabPagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(mTabAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -177,8 +181,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initFireBase() {
-        Firebase.setAndroidContext(this);
-        sFireBaseRef = new Firebase("https://accobserverservice.firebaseio.com/mesurements");
+        sUsersRef = new Firebase(FIREBASE_URL).child("users");
+//        sSamplesRef = new Firebase(FIREBASE_URL).child("measurements");
     }
 
     @Override
@@ -267,7 +271,7 @@ public class MainActivity extends AppCompatActivity
 
         if (token != null) {
             /* Successfully got OAuth token, now login with Google */
-            sFireBaseRef.authWithOAuthToken("google", token, new AuthResultHandler("google"));
+            sUsersRef.authWithOAuthToken("google", token, new AuthResultHandler("google"));
         }
 
 //        samoshkin88@gmail.com;
@@ -294,11 +298,13 @@ public class MainActivity extends AppCompatActivity
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(Status status) {
-                        // [START_EXCLUDE]
+
                         updateUI(false);
-                        // [END_EXCLUDE]
+
                     }
                 });
+        sSamplesRef = null;
+        updateDataFrag();
     }
     // [END signOut]
 
@@ -429,16 +435,21 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onAuthenticated(AuthData authData) {
-//            mAuthProgressDialog.hide();
             Log.d(MAIN_TAG, provider + " auth successful \n" +
                     "authData: " + authData.toString());
-//            setAuthenticatedUser(authData);
+
+            sUsersRef.child(authData.getUid()).setValue(authData);
+            if (sSamplesRef != null) sSamplesRef.removeEventListener(sChildEventListener);
+            sSamplesRef = new Firebase(FIREBASE_URL).child("measurements").child(authData.getUid());
+            updateDataFrag();
         }
 
         @Override
         public void onAuthenticationError(FirebaseError firebaseError) {
-//            mAuthProgressDialog.hide();
-//            showErrorDialog(firebaseError.toString());
         }
+    }
+
+    private void updateDataFrag() {
+        mTabAdapter.notifyDataSetChanged();
     }
 }
