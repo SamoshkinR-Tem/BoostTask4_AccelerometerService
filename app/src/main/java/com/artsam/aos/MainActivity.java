@@ -96,6 +96,8 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+    // TODO Driver Navigation
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,7 +110,67 @@ public class MainActivity extends AppCompatActivity
 
         initTabLayout();
         initGoogleSignin();
-        initFireBase();
+
+        sUsersRef = new Firebase(FIREBASE_URL).child("users");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        Log.d(MAIN_TAG, "MainActivity: onStart");
+
+        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        if (opr.isDone()) {
+            // If the user's cached credentials are valid,
+            // the OptionalPendingResult will be "done"
+            // and the GoogleSignInResult will be available instantly.
+            Log.d(MAIN_TAG, "Got cached sign-in");
+            GoogleSignInResult result = opr.get();
+            handleSignInResult(result);
+        } else {
+            // If the user has not previously signed in on this device or the sign-in has expired,
+            // this asynchronous branch will attempt to sign in the user silently.  Cross-device
+            // single sign-on will occur in this branch.
+            showProgressDialog();
+            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
+                    hideProgressDialog();
+                    handleSignInResult(googleSignInResult);
+                }
+            });
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        SwitchCompat switchCompat = (SwitchCompat) menu.getItem(0)
+                .getActionView().findViewById(R.id.switch_control);
+        switchCompat.setOnCheckedChangeListener(this);
+
+        return true;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d(MAIN_TAG, "MainActivity: onActivityResult");
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+
+        if (requestCode == REQ_SIGN_IN_REQUIRED && resultCode == RESULT_OK) {
+            // We had to sign in - now we can finish off the token request.
+            new RetrieveTokenTask().execute(mAccountName);
+        }
     }
 
     private void initTabLayout() {
@@ -148,103 +210,25 @@ public class MainActivity extends AppCompatActivity
         findViewById(R.id.btn_sign_in).setOnClickListener(this);
         findViewById(R.id.btn_sign_out).setOnClickListener(this);
 
-        // [START configure_signin]
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
-        // [END configure_signin]
 
-        // [START build_client]
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
+        // Build a GoogleApiClient with access to the Google Sign-In API
+        // and the options specified by gso.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-        // [END build_client]
 
-        // [START customize_button]
-        // Customize sign-in button. The sign-in button can be displayed in
-        // multiple sizes and color schemes. It can also be contextually
-        // rendered based on the requested scopes. For example. a red button may
-        // be displayed when Google+ scopes are requested, but a white button
-        // may be displayed when only basic profile is requested. Try adding the
-        // Scopes.PLUS_LOGIN scope to the GoogleSignInOptions to see the
-        // difference.
+        // Customize sign-in button.
         SignInButton signInButton = (SignInButton) findViewById(R.id.btn_sign_in);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setScopes(gso.getScopeArray());
-        // [END customize_button]
-
     }
 
-    private void initFireBase() {
-        sUsersRef = new Firebase(FIREBASE_URL).child("users");
-//        sSamplesRef = new Firebase(FIREBASE_URL).child("measurements");
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        Log.d(MAIN_TAG, "MainActivity: onStart");
-
-        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-        if (opr.isDone()) {
-            // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
-            // and the GoogleSignInResult will be available instantly.
-            Log.d(MAIN_TAG, "Got cached sign-in");
-            GoogleSignInResult result = opr.get();
-            handleSignInResult(result);
-        } else {
-            // If the user has not previously signed in on this device or the sign-in has expired,
-            // this asynchronous branch will attempt to sign in the user silently.  Cross-device
-            // single sign-on will occur in this branch.
-            showProgressDialog();
-            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                @Override
-                public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
-                    hideProgressDialog();
-                    handleSignInResult(googleSignInResult);
-                }
-            });
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-
-        SwitchCompat switchCompat = (SwitchCompat) menu.getItem(0)
-                .getActionView().findViewById(R.id.switch_control);
-        switchCompat.setOnCheckedChangeListener(this);
-
-        return true;
-    }
-
-    // [START onActivityResult]
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        Log.d(MAIN_TAG, "MainActivity: onActivityResult");
-
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
-        }
-        if (requestCode == REQ_SIGN_IN_REQUIRED && resultCode == RESULT_OK) {
-            // We had to sign in - now we can finish off the token request.
-            new RetrieveTokenTask().execute(mAccountName);
-        }
-    }
-    // [END onActivityResult]
-
-    // [START handleSignInResult]
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(MAIN_TAG, "MainActivity: handleSignInResult - " + result.isSuccess());
         if (result.isSuccess()) {
@@ -266,52 +250,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void authFireBase(String token) {
-        Log.d(MAIN_TAG, "TOKEN IS " + token);
-
-        if (token != null) {
-            /* Successfully got OAuth token, now login with Google */
-            sUsersRef.authWithOAuthToken("google", token, new AuthResultHandler("google"));
-        }
-
-//        samoshkin88@gmail.com;
-//        Artem Samoshkin;
-//        101065137054816131793;
-//        null;
-//        null;
-//        email, https://www.googleapis.com/auth/userinfo.profile, openid, https://www.googleapis.com/auth/userinfo.email, profile, https://www.googleapis.com/auth/plus.me]
-    }
-    // [END handleSignInResult]
-
-    // [START signIn]
-    private void signIn() {
-        Log.d(MAIN_TAG, "MainActivity: signIn");
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-    // [END signIn]
-
-    // [START signOut]
-    private void signOut() {
-        Log.d(MAIN_TAG, "MainActivity: signOut");
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-
-                        updateUI(false);
-
-                    }
-                });
-        sSamplesRef = null;
-        updateDataFrag();
-    }
-    // [END signOut]
-
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
+        // An unresolvable error has occurred and Google APIs (including Sign-In)
+        // will not be available.
         Log.d(MAIN_TAG, "MainActivity: onConnectionFailed - " + connectionResult);
         Toast.makeText(this, "ConnectionFailed; " + connectionResult, Toast.LENGTH_SHORT);
     }
@@ -357,6 +299,27 @@ public class MainActivity extends AppCompatActivity
                 signOut();
                 break;
         }
+    }
+
+    private void signIn() {
+        Log.d(MAIN_TAG, "MainActivity: signIn");
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void signOut() {
+        Log.d(MAIN_TAG, "MainActivity: signOut");
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+
+                        updateUI(false);
+
+                    }
+                });
+        sSamplesRef = null;
+        updateDataFrag();
     }
 
     @Override
@@ -420,6 +383,15 @@ public class MainActivity extends AppCompatActivity
             super.onPostExecute(s);
             authFireBase(s);
         }
+
+        private void authFireBase(String token) {
+            Log.d(MAIN_TAG, "TOKEN IS " + token);
+
+            if (token != null) {
+                // Successfully got OAuth token, now login with Google
+                sUsersRef.authWithOAuthToken("google", token, new AuthResultHandler("google"));
+            }
+        }
     }
 
     /**
@@ -438,7 +410,9 @@ public class MainActivity extends AppCompatActivity
             Log.d(MAIN_TAG, provider + " auth successful \n" +
                     "authData: " + authData.toString());
 
+            // Save authenticated user to FireBase
             sUsersRef.child(authData.getUid()).setValue(authData);
+
             if (sSamplesRef != null) sSamplesRef.removeEventListener(sChildEventListener);
             sSamplesRef = new Firebase(FIREBASE_URL).child("measurements").child(authData.getUid());
             updateDataFrag();

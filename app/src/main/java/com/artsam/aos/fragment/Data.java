@@ -43,7 +43,11 @@ public class Data extends Fragment {
         if(MainActivity.sSamplesRef != null){
             MainActivity.sChildEventListener = MainActivity.sSamplesRef
                     .addChildEventListener(new MyChildEventListener(mRecView, mPlotView));
+        } else {
+            data.findViewById(R.id.tv_instead_rv).setVisibility(View.VISIBLE);
+            data.findViewById(R.id.rv_samples).setVisibility(View.GONE);
         }
+
         return data;
     }
 }

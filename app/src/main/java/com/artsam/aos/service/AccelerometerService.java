@@ -99,6 +99,8 @@ public class AccelerometerService extends Service
                     lastUpdate = curTime;
                 }
             }
+        } else {
+
         }
     }
 

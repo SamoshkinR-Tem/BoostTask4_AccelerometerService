@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
@@ -9,7 +10,20 @@
         android:id="@+id/rv_samples"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3" />
+        android:layout_weight="3"
+        android:visibility="visible"
+        tools:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_instead_rv"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:text="To see Accelerometer sensor data \n You have to be Signed In"
+        android:textSize="30sp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:gravity="center" />
 
     <com.artsam.aos.view.MyPlotView
         android:id="@+id/my_plot_View"
